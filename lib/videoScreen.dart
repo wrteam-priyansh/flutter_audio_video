@@ -1,6 +1,5 @@
 // ignore_for_file: file_names
 
-import 'package:flick_video_player/flick_video_player.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -12,15 +11,37 @@ class VideoScreen extends StatefulWidget {
   _VideoScreenState createState() => _VideoScreenState();
 }
 
-class _VideoScreenState extends State<VideoScreen> {
-  final String url = " https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4";
+class _VideoScreenState extends State<VideoScreen> with TickerProviderStateMixin {
+  final String url = "https://firebasestorage.googleapis.com/v0/b/quiz-flutter-new.appspot.com/o/video.mp4?alt=media&token=b224b4ee-5e7f-4222-87aa-6a80841c17c2";
+  //https://firebasestorage.googleapis.com/v0/b/quiz-flutter-new.appspot.com/o/tabbar-animation.mp4?alt=media&token=09edb746-d788-4598-9cd0-298cf2b799b6
+  //https://firebasestorage.googleapis.com/v0/b/quiz-flutter-new.appspot.com/o/botAnimation.mp4?alt=media&token=7dbf70ef-4884-4a93-a19c-a6e690e1702a
+  //https://firebasestorage.googleapis.com/v0/b/quiz-flutter-new.appspot.com/o/video.mp4?alt=media&token=b224b4ee-5e7f-4222-87aa-6a80841c17c2
 
-  late FlickManager flickManager;
+  VideoPlayerController? videoPlayerController;
+  late AnimationController menuAnimationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
+  late Animation<double> menuAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: menuAnimationController, curve: Curves.easeInOut));
+  // ignore: prefer_final_fields
+  bool isBuffering = false;
+  bool isPlaying = false;
+  bool isCompleted = false;
 
-  void loadVideo() {
-    flickManager = FlickManager(
-      videoPlayerController: VideoPlayerController.network(url),
-    );
+  void loadVideo() async {
+    videoPlayerController = VideoPlayerController.network(url, videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true))
+      ..addListener(videoListener)
+      ..initialize().then((value) {
+        setState(() {});
+
+        debugPrint("Initial buffer value : ${videoPlayerController!.value.isBuffering}");
+        //videoPlayerController?.play();
+      });
+  }
+
+  void videoListener() {
+    if (videoPlayerController!.value.position.inSeconds == videoPlayerController!.value.duration.inSeconds) {
+      setState(() {
+        isCompleted = true;
+      });
+    }
   }
 
   @override
@@ -31,26 +52,265 @@ class _VideoScreenState extends State<VideoScreen> {
 
   @override
   void dispose() {
-    flickManager.dispose();
+    videoPlayerController?.removeListener(videoListener);
+    videoPlayerController?.dispose();
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: FlickVideoPlayer(
-          flickManager: flickManager,
-          flickVideoWithControls: const FlickVideoWithControls(
-            controls: FlickVideoBuffer(
-              bufferingChild: CircularProgressIndicator(
-                color: Colors.yellowAccent,
+      body: Stack(
+        children: [
+          Center(
+              child: !videoPlayerController!.value.isInitialized
+                  ? Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height,
+                      color: Colors.black45,
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                        ),
+                      ),
+                    )
+                  : GestureDetector(
+                      onTap: () {
+                        if (menuAnimationController.isCompleted) {
+                          menuAnimationController.reverse();
+                        } else {
+                          menuAnimationController.forward();
+                        }
+                      },
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        child: VideoPlayer(
+                          videoPlayerController!,
+                        ),
+                      ),
+                    )),
+          Center(
+            child: isBuffering ? const CircularProgressIndicator() : const SizedBox(),
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: videoPlayerController!.value.isInitialized ? VideoBufferingContainer(videoPlayerController: videoPlayerController!) : Container(),
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: ScaleTransition(
+              scale: menuAnimation,
+              child: GestureDetector(
+                onTap: () async {
+                  if (isCompleted) {
+                    await videoPlayerController!.seekTo(Duration.zero);
+                    videoPlayerController!.play();
+                    setState(() {
+                      isCompleted = false;
+                      isPlaying = true;
+                    });
+                  } else {
+                    if (isPlaying) {
+                      videoPlayerController!.pause();
+                      setState(() {
+                        isPlaying = !isPlaying;
+                      });
+                    } else {
+                      videoPlayerController!.play();
+                      setState(() {
+                        isPlaying = !isPlaying;
+                      });
+                    }
+                  }
+                },
+                child: CircleAvatar(
+                  backgroundColor: Colors.white,
+                  radius: 30,
+                  child: Icon(
+                    isCompleted
+                        ? Icons.restart_alt
+                        : isPlaying
+                            ? Icons.pause
+                            : Icons.play_arrow,
+                    size: 28,
+                  ),
+                ),
               ),
             ),
           ),
-          wakelockEnabled: true,
-        ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: SlideTransition(
+              position: menuAnimation.drive<Offset>(Tween(begin: const Offset(0.0, 1.0), end: Offset.zero)),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 10.0),
+                child: Container(color: Colors.white38, width: MediaQuery.of(context).size.width, height: 5),
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: SlideTransition(
+              position: menuAnimation.drive<Offset>(Tween(begin: const Offset(0.0, 1.0), end: Offset.zero)),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 10.0),
+                child: videoPlayerController!.value.isInitialized
+                    ? VideoBufferDurationContainer(
+                        videoPlayerController: videoPlayerController!,
+                      )
+                    : Container(),
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: SlideTransition(
+              position: menuAnimation.drive<Offset>(Tween(begin: const Offset(0.0, 1.0), end: Offset.zero)),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 10.0),
+                child: videoPlayerController!.value.isInitialized ? VideoDurationContainer(videoPlayerController: videoPlayerController!) : Container(),
+              ),
+            ),
+          ),
+        ],
       ),
+    );
+  }
+}
+
+class VideoBufferingContainer extends StatefulWidget {
+  final VideoPlayerController videoPlayerController;
+  const VideoBufferingContainer({Key? key, required this.videoPlayerController}) : super(key: key);
+
+  @override
+  _VideoBufferingContainerState createState() => _VideoBufferingContainerState();
+}
+
+class _VideoBufferingContainerState extends State<VideoBufferingContainer> {
+  bool isVideoBuffering = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.videoPlayerController.addListener(videoBufferDurationListener);
+  }
+
+  @override
+  void dispose() {
+    widget.videoPlayerController.removeListener(videoBufferDurationListener);
+    super.dispose();
+  }
+
+  void videoBufferDurationListener() {
+    if (widget.videoPlayerController.value.buffered.isNotEmpty) {
+      if (widget.videoPlayerController.value.buffered.last.end.inSeconds == widget.videoPlayerController.value.position.inSeconds) {
+        if (widget.videoPlayerController.value.position.inSeconds != widget.videoPlayerController.value.duration.inSeconds) {
+          setState(() {
+            isVideoBuffering = true;
+          });
+        }
+      } else {
+        setState(() {
+          isVideoBuffering = false;
+        });
+      }
+    } else {
+      setState(() {
+        isVideoBuffering = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return isVideoBuffering
+        ? const CircleAvatar(
+            child: CircularProgressIndicator(
+              color: Colors.white,
+            ),
+            radius: 35,
+          )
+        : Container();
+  }
+}
+
+class VideoBufferDurationContainer extends StatefulWidget {
+  final VideoPlayerController videoPlayerController;
+  const VideoBufferDurationContainer({Key? key, required this.videoPlayerController}) : super(key: key);
+
+  @override
+  _VideoBufferDurationContainerState createState() => _VideoBufferDurationContainerState();
+}
+
+class _VideoBufferDurationContainerState extends State<VideoBufferDurationContainer> {
+  double bufferDurationWidthPercentage = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.videoPlayerController.addListener(videoBufferDurationListener);
+  }
+
+  @override
+  void dispose() {
+    widget.videoPlayerController.removeListener(videoBufferDurationListener);
+    super.dispose();
+  }
+
+  void videoBufferDurationListener() {
+    if (widget.videoPlayerController.value.buffered.isNotEmpty) {
+      bufferDurationWidthPercentage = widget.videoPlayerController.value.buffered.last.end.inSeconds / widget.videoPlayerController.value.duration.inSeconds;
+    } else {
+      bufferDurationWidthPercentage = 0.0;
+    }
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.white54,
+      width: MediaQuery.of(context).size.width * bufferDurationWidthPercentage,
+      height: 5,
+    );
+  }
+}
+
+class VideoDurationContainer extends StatefulWidget {
+  final VideoPlayerController videoPlayerController;
+  const VideoDurationContainer({Key? key, required this.videoPlayerController}) : super(key: key);
+  @override
+  _VideoDurationContainerState createState() => _VideoDurationContainerState();
+}
+
+class _VideoDurationContainerState extends State<VideoDurationContainer> {
+  double durationWidthPercentage = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.videoPlayerController.addListener(videoDurationListener);
+  }
+
+  @override
+  void dispose() {
+    widget.videoPlayerController.removeListener(videoDurationListener);
+    super.dispose();
+  }
+
+  void videoDurationListener() {
+    durationWidthPercentage = widget.videoPlayerController.value.position.inSeconds / widget.videoPlayerController.value.duration.inSeconds;
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.white,
+      width: MediaQuery.of(context).size.width * durationWidthPercentage,
+      height: 5,
     );
   }
 }
