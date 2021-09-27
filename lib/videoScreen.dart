@@ -75,22 +75,41 @@ class _VideoScreenState extends State<VideoScreen> with TickerProviderStateMixin
                         ),
                       ),
                     )
-                  : GestureDetector(
-                      onTap: () {
-                        if (menuAnimationController.isCompleted) {
-                          menuAnimationController.reverse();
-                        } else {
-                          menuAnimationController.forward();
-                        }
-                      },
-                      child: SizedBox(
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height,
-                        child: VideoPlayer(
-                          videoPlayerController!,
-                        ),
+                  : SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height,
+                      child: VideoPlayer(
+                        videoPlayerController!,
                       ),
                     )),
+          videoPlayerController!.value.isInitialized
+              ? GestureDetector(
+                  onTap: () {
+                    if (menuAnimationController.isCompleted) {
+                      menuAnimationController.reverse();
+                    } else {
+                      menuAnimationController.forward();
+                    }
+                  },
+                  onDoubleTap: () {
+                    //debugPrint("Double tapped ");
+                  },
+                  onDoubleTapDown: (tapDownDetails) {
+                    if (tapDownDetails.globalPosition.dx <= MediaQuery.of(context).size.width * (0.5)) {
+                      debugPrint("Left Side");
+                      videoPlayerController!.seekTo(Duration(seconds: videoPlayerController!.value.position.inSeconds - 10));
+                    } else {
+                      debugPrint("Right Side");
+                      videoPlayerController!.seekTo(Duration(seconds: videoPlayerController!.value.position.inSeconds + 10));
+                    }
+                  },
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    color: Colors.transparent,
+                  ),
+                )
+              : Container(),
           Center(
             child: isBuffering ? const CircularProgressIndicator() : const SizedBox(),
           ),
