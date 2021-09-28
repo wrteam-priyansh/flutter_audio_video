@@ -12,10 +12,7 @@ class VideoScreen extends StatefulWidget {
 }
 
 class _VideoScreenState extends State<VideoScreen> with TickerProviderStateMixin {
-  final String url = "https://firebasestorage.googleapis.com/v0/b/quiz-flutter-new.appspot.com/o/video.mp4?alt=media&token=b224b4ee-5e7f-4222-87aa-6a80841c17c2";
-  //https://firebasestorage.googleapis.com/v0/b/quiz-flutter-new.appspot.com/o/tabbar-animation.mp4?alt=media&token=09edb746-d788-4598-9cd0-298cf2b799b6
-  //https://firebasestorage.googleapis.com/v0/b/quiz-flutter-new.appspot.com/o/botAnimation.mp4?alt=media&token=7dbf70ef-4884-4a93-a19c-a6e690e1702a
-  //https://firebasestorage.googleapis.com/v0/b/quiz-flutter-new.appspot.com/o/video.mp4?alt=media&token=b224b4ee-5e7f-4222-87aa-6a80841c17c2
+  final String url = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
 
   VideoPlayerController? videoPlayerController;
   late AnimationController menuAnimationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
@@ -98,9 +95,11 @@ class _VideoScreenState extends State<VideoScreen> with TickerProviderStateMixin
                     if (tapDownDetails.globalPosition.dx <= MediaQuery.of(context).size.width * (0.5)) {
                       debugPrint("Left Side");
                       videoPlayerController!.seekTo(Duration(seconds: videoPlayerController!.value.position.inSeconds - 10));
+                      //videoPlayerController!.play();
                     } else {
                       debugPrint("Right Side");
                       videoPlayerController!.seekTo(Duration(seconds: videoPlayerController!.value.position.inSeconds + 10));
+                      //videoPlayerController!.play();
                     }
                   },
                   child: Container(
