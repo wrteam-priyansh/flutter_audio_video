@@ -1,5 +1,5 @@
-import 'package:audio_video/homeScreen.dart';
-import 'package:audio_video/videoScreen.dart';
+import 'package:audio_video/screens/homeScreen.dart';
+import 'package:audio_video/screens/video/videoScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
