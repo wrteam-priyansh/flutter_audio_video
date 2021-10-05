@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
+//video screen
 class VideoScreen extends StatefulWidget {
   final VideoType videoType;
   final String? videoPath;
@@ -26,11 +27,11 @@ class _VideoScreenState extends State<VideoScreen> with TickerProviderStateMixin
   late Animation<double> menuAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: menuAnimationController, curve: Curves.easeInOut));
 
   //
-  late AnimationController forwardVideoAnimationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
+  late AnimationController forwardVideoAnimationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
   late Animation<double> forwardVideoAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: forwardVideoAnimationController, curve: Curves.easeInOut));
   //
-  late AnimationController backwardVideoAnimationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
-  late Animation<double> backwardVideoAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: menuAnimationController, curve: Curves.easeInOut));
+  late AnimationController backwardVideoAnimationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
+  late Animation<double> backwardVideoAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: backwardVideoAnimationController, curve: Curves.easeInOut));
 
   bool isPlaying = false;
   bool isCompleted = false;
@@ -101,6 +102,80 @@ class _VideoScreenState extends State<VideoScreen> with TickerProviderStateMixin
     super.dispose();
   }
 
+  Widget _buildBackwardVideoDurationContainer(Size videoSize) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: videoSize.width * (0.25),
+        ),
+        child: FadeTransition(
+          opacity: backwardVideoAnimation,
+          child: IgnorePointer(
+            ignoring: true,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.skip_previous,
+                  color: Colors.white,
+                ),
+                SizedBox(
+                  height: 5.0,
+                ),
+                Text(
+                  "10s",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.5,
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildForwardVideoDurationContainer(Size videoSize) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Padding(
+        padding: EdgeInsets.only(
+          right: videoSize.width * (0.25),
+        ),
+        child: FadeTransition(
+          opacity: forwardVideoAnimation,
+          child: IgnorePointer(
+            ignoring: true,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.skip_next,
+                  color: Colors.white,
+                ),
+                SizedBox(
+                  height: 5.0,
+                ),
+                Text(
+                  "10s",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.5,
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildVideoContainer(Size videoSize) {
     return Stack(
       children: [
@@ -152,13 +227,19 @@ class _VideoScreenState extends State<VideoScreen> with TickerProviderStateMixin
                 onDoubleTap: () {
                   //debugPrint("Double tapped ");
                 },
-                onDoubleTapDown: (tapDownDetails) {
+                onDoubleTapDown: (tapDownDetails) async {
                   if (tapDownDetails.globalPosition.dx <= videoSize.width * (0.5)) {
                     debugPrint("Left Side");
                     videoPlayerController!.seekTo(Duration(seconds: videoPlayerController!.value.position.inSeconds - 10));
+                    await backwardVideoAnimationController.forward();
+                    await Future.delayed(Duration(milliseconds: 500));
+                    backwardVideoAnimationController.reverse();
                   } else {
                     debugPrint("Right Side");
                     videoPlayerController!.seekTo(Duration(seconds: videoPlayerController!.value.position.inSeconds + 10));
+                    await forwardVideoAnimationController.forward();
+                    await Future.delayed(Duration(milliseconds: 500));
+                    forwardVideoAnimationController.reverse();
                   }
                 },
                 child: Container(
@@ -214,6 +295,11 @@ class _VideoScreenState extends State<VideoScreen> with TickerProviderStateMixin
           alignment: Alignment.center,
           child: videoPlayerController!.value.isInitialized ? VideoBufferingContainer(videoPlayerController: videoPlayerController!) : Container(),
         ),
+        _buildBackwardVideoDurationContainer(videoSize),
+        _buildForwardVideoDurationContainer(videoSize),
+
+        //videoBottomMenu
+
         Align(
           alignment: Alignment.bottomLeft,
           child: SlideTransition(
@@ -431,6 +517,40 @@ class _VideoDurationContainerState extends State<VideoDurationContainer> {
             }),
       ),
     );
+  }
+}
+
+class VideoBottomMenuContainer extends StatefulWidget {
+  final VideoPlayerController videoPlayerController;
+  VideoBottomMenuContainer({Key? key, required this.videoPlayerController}) : super(key: key);
+
+  @override
+  _VideoBottomMenuContainerState createState() => _VideoBottomMenuContainerState();
+}
+
+class _VideoBottomMenuContainerState extends State<VideoBottomMenuContainer> {
+  String currentTime = "";
+
+  @override
+  void initState() {
+    super.initState();
+    widget.videoPlayerController.addListener(videoDurationListener);
+  }
+
+  @override
+  void dispose() {
+    widget.videoPlayerController.removeListener(videoDurationListener);
+    super.dispose();
+  }
+
+  void videoDurationListener() {
+    //currentValue = widget.videoPlayerController.value.position.inSeconds.toDouble();
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row();
   }
 }
 

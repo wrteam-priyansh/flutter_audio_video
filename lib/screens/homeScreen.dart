@@ -1,4 +1,5 @@
 // ignore_for_file: file_names
+import 'package:audio_video/screens/audio/audioMenuScreen.dart';
 import 'package:audio_video/screens/video/videoMenuScreen.dart';
 import 'package:audio_video/screens/video/videoScreen.dart';
 import 'package:flutter/cupertino.dart';
@@ -24,6 +25,12 @@ class HomeScreen extends StatelessWidget {
             ),
             SizedBox(
               height: 10.0,
+            ),
+            ListTile(
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AudioMenuScreen()));
+              },
+              title: const Text("Audio"),
             ),
           ],
         ),

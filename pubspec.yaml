@@ -33,6 +33,7 @@ dependencies:
   flutter:
     sdk: flutter
   image_picker: ^0.8.4+2
+  just_audio: ^0.9.12
   video_player: ^2.2.5
 
 dev_dependencies:
