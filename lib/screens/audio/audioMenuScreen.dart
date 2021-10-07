@@ -2,7 +2,8 @@ import 'package:audio_video/screens/audio/audioScreen.dart';
 import 'package:flutter/material.dart';
 
 enum AudioType { network, file, asset }
-const String audioUrl = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3';
+const String audioUrl = "http://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/theme_01.mp3";
+//'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3';
 
 class AudioMenuScreen extends StatelessWidget {
   const AudioMenuScreen({Key? key}) : super(key: key);
