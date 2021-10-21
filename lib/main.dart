@@ -1,6 +1,7 @@
+import 'package:audio_service/audio_service.dart';
+import 'package:audio_video/feature/audioPlayerHandler.dart';
 import 'package:audio_video/feature/musicPlayerCubit.dart';
 import 'package:audio_video/screens/homeScreen.dart';
-import 'package:audio_video/screens/video/videoScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,18 +13,32 @@ void main() async {
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.portraitUp,
   ]);
-  runApp(const MyApp());
+  final audioHandler = await AudioService.init<AudioPlayerHandler>(
+    builder: () => AudioPlayerHandler(),
+    config: const AudioServiceConfig(
+      androidNotificationChannelId: 'com.ryanheise.myapp.channel.audio',
+      androidNotificationChannelName: 'Audio playback',
+      androidNotificationOngoing: true,
+      notificationColor: Colors.red,
+      androidStopForegroundOnPause: true,
+      androidShowNotificationBadge: true,
+    ),
+  );
+  runApp(MyApp(
+    audioHandler: audioHandler,
+  ));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  final AudioPlayerHandler audioHandler;
+  MyApp({Key? key, required this.audioHandler}) : super(key: key);
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<MusicPlayerCubit>(create: (_) => MusicPlayerCubit()),
+        BlocProvider<MusicPlayerCubit>(create: (_) => MusicPlayerCubit(audioHandler)),
       ],
       child: MaterialApp(
         title: 'Flutter Demo',

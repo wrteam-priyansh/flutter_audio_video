@@ -56,11 +56,19 @@ class MusicPlayer extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              /*
               CurrentDurationContainer(),
               Spacer(),
               PlayerControlContainer(),
               Spacer(),
-              BlocBuilder<MusicPlayerCubit, MusicPlayerState>(
+              */
+
+              BlocConsumer<MusicPlayerCubit, MusicPlayerState>(
+                listener: (context, state) {
+                  if (state is MusicPlayerSuccess) {
+                    context.read<MusicPlayerCubit>().audioPlayerHandler.play();
+                  }
+                },
                 bloc: context.read<MusicPlayerCubit>(),
                 builder: (context, state) {
                   if (state is MusicPlayerSuccess) {
@@ -84,6 +92,7 @@ class MusicPlayer extends StatelessWidget {
             ],
           ),
         ),
+        /*
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Stack(
@@ -99,6 +108,7 @@ class MusicPlayer extends StatelessWidget {
             ],
           ),
         ),
+        */
       ],
     );
   }

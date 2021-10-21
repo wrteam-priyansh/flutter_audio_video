@@ -1,5 +1,9 @@
+import 'package:audio_service/audio_service.dart';
+import 'package:audio_video/feature/audioPlayerHandler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
+
+//https://exampledomain.com/song.mp3
 
 abstract class MusicPlayerState {}
 
@@ -21,19 +25,17 @@ class MusicPlayerFailure extends MusicPlayerState {
 }
 
 class MusicPlayerCubit extends Cubit<MusicPlayerState> {
-  MusicPlayerCubit() : super(MusicPlayerInitial());
+  final AudioPlayerHandler _audioHandler;
+  MusicPlayerCubit(this._audioHandler) : super(MusicPlayerInitial()) {}
 
   void initPlayer(String url) async {
-    if (state is MusicPlayerSuccess) {
-      (state as MusicPlayerSuccess).audioPlayer.dispose();
-    }
     emit(MusicPlayerLoading());
     try {
-      AudioPlayer audioPlayer = AudioPlayer();
-      var result = await audioPlayer.setUrl(url);
+      await _audioHandler.setAudio(url);
+
       emit(MusicPlayerSuccess(
-        audioDuration: result!,
-        audioPlayer: audioPlayer,
+        audioDuration: _audioHandler.currentAudioDuration,
+        audioPlayer: _audioHandler.audioPlayer,
       ));
     } catch (e) {
       print(e.toString());
@@ -41,11 +43,11 @@ class MusicPlayerCubit extends Cubit<MusicPlayerState> {
     }
   }
 
+  AudioPlayerHandler get audioPlayerHandler => _audioHandler;
+
   @override
   Future<void> close() async {
-    if (state is MusicPlayerSuccess) {
-      (state as MusicPlayerSuccess).audioPlayer.dispose();
-    }
+    _audioHandler.disposeAudioPlayer();
     super.close();
   }
 }
