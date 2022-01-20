@@ -1,10 +1,13 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_video/feature/audioPlayerHandler.dart';
 import 'package:audio_video/feature/musicPlayerCubit.dart';
-import 'package:audio_video/screens/homeScreen.dart';
+import 'package:audio_video/providers/audioHandlerProvider.dart';
+import 'package:audio_video/screens/audio/audioStreamScreen.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,9 +39,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
+    return MultiProvider(
       providers: [
-        BlocProvider<MusicPlayerCubit>(create: (_) => MusicPlayerCubit(audioHandler)),
+        Provider<AudioHandlerProvider>(
+            create: (_) => AudioHandlerProvider(audioHandler))
       ],
       child: MaterialApp(
         title: 'Flutter Demo',
@@ -54,7 +58,7 @@ class MyApp extends StatelessWidget {
           // is not restarted.
           primarySwatch: Colors.blue,
         ),
-        home: const HomeScreen(),
+        home: const AudioStreamScreen(),
       ),
     );
   }

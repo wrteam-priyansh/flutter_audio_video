@@ -3,7 +3,7 @@
 import 'dart:io';
 
 import 'package:audio_video/screens/video/videoMenuScreen.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -13,7 +13,13 @@ class VideoScreen extends StatefulWidget {
   final String? videoPath;
   final bool isInPlaylist;
   final File? videoFile;
-  const VideoScreen({Key? key, required this.videoType, this.videoPath, required this.isInPlaylist, this.videoFile}) : super(key: key);
+  const VideoScreen(
+      {Key? key,
+      required this.videoType,
+      this.videoPath,
+      required this.isInPlaylist,
+      this.videoFile})
+      : super(key: key);
 
   @override
   _VideoScreenState createState() => _VideoScreenState();
@@ -21,17 +27,29 @@ class VideoScreen extends StatefulWidget {
 
 const double videoDurationContainerHeight = 3.5;
 
-class _VideoScreenState extends State<VideoScreen> with TickerProviderStateMixin {
+class _VideoScreenState extends State<VideoScreen>
+    with TickerProviderStateMixin {
   VideoPlayerController? videoPlayerController;
-  late AnimationController menuAnimationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
-  late Animation<double> menuAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: menuAnimationController, curve: Curves.easeInOut));
+  late AnimationController menuAnimationController = AnimationController(
+      vsync: this, duration: const Duration(milliseconds: 400));
+  late Animation<double> menuAnimation = Tween<double>(begin: 0.0, end: 1.0)
+      .animate(CurvedAnimation(
+          parent: menuAnimationController, curve: Curves.easeInOut));
 
   //
-  late AnimationController forwardVideoAnimationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
-  late Animation<double> forwardVideoAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: forwardVideoAnimationController, curve: Curves.easeInOut));
+  late AnimationController forwardVideoAnimationController =
+      AnimationController(
+          vsync: this, duration: const Duration(milliseconds: 200));
+  late Animation<double> forwardVideoAnimation =
+      Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
+          parent: forwardVideoAnimationController, curve: Curves.easeInOut));
   //
-  late AnimationController backwardVideoAnimationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
-  late Animation<double> backwardVideoAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: backwardVideoAnimationController, curve: Curves.easeInOut));
+  late AnimationController backwardVideoAnimationController =
+      AnimationController(
+          vsync: this, duration: const Duration(milliseconds: 200));
+  late Animation<double> backwardVideoAnimation =
+      Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
+          parent: backwardVideoAnimationController, curve: Curves.easeInOut));
 
   bool isPlaying = false;
   bool isCompleted = false;
@@ -39,36 +57,42 @@ class _VideoScreenState extends State<VideoScreen> with TickerProviderStateMixin
 
   void loadVideo() async {
     if (widget.videoType == VideoType.network) {
-      videoPlayerController = VideoPlayerController.network(widget.videoPath!, videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true))
+      videoPlayerController = VideoPlayerController.network(widget.videoPath!,
+          videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true))
         ..addListener(videoListener)
         ..initialize().then((value) {
           setState(() {
             isPlaying = true;
           });
 
-          debugPrint("Initial buffer value : ${videoPlayerController!.value.isBuffering}");
+          debugPrint(
+              "Initial buffer value : ${videoPlayerController!.value.isBuffering}");
           videoPlayerController?.play();
         });
     } else if (widget.videoType == VideoType.asset) {
-      videoPlayerController = VideoPlayerController.asset(widget.videoPath!, videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true))
+      videoPlayerController = VideoPlayerController.asset(widget.videoPath!,
+          videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true))
         ..addListener(videoListener)
         ..initialize().then((value) {
           setState(() {
             isPlaying = true;
           });
 
-          debugPrint("Initial buffer value : ${videoPlayerController!.value.isBuffering}");
+          debugPrint(
+              "Initial buffer value : ${videoPlayerController!.value.isBuffering}");
           videoPlayerController?.play();
         });
     } else {
-      videoPlayerController = VideoPlayerController.file(widget.videoFile!, videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true))
+      videoPlayerController = VideoPlayerController.file(widget.videoFile!,
+          videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true))
         ..addListener(videoListener)
         ..initialize().then((value) {
           setState(() {
             isPlaying = true;
           });
 
-          debugPrint("Initial buffer value : ${videoPlayerController!.value.isBuffering}");
+          debugPrint(
+              "Initial buffer value : ${videoPlayerController!.value.isBuffering}");
           videoPlayerController?.play();
         });
     }
@@ -80,7 +104,8 @@ class _VideoScreenState extends State<VideoScreen> with TickerProviderStateMixin
         hasError = true;
       });
     } else {
-      if (videoPlayerController!.value.position.inSeconds == videoPlayerController!.value.duration.inSeconds) {
+      if (videoPlayerController!.value.position.inSeconds ==
+          videoPlayerController!.value.duration.inSeconds) {
         setState(() {
           isCompleted = true;
         });
@@ -228,15 +253,22 @@ class _VideoScreenState extends State<VideoScreen> with TickerProviderStateMixin
                   //debugPrint("Double tapped ");
                 },
                 onDoubleTapDown: (tapDownDetails) async {
-                  if (tapDownDetails.globalPosition.dx <= videoSize.width * (0.5)) {
+                  if (tapDownDetails.globalPosition.dx <=
+                      videoSize.width * (0.5)) {
                     debugPrint("Left Side");
-                    videoPlayerController!.seekTo(Duration(seconds: videoPlayerController!.value.position.inSeconds - 10));
+                    videoPlayerController!.seekTo(Duration(
+                        seconds:
+                            videoPlayerController!.value.position.inSeconds -
+                                10));
                     await backwardVideoAnimationController.forward();
                     await Future.delayed(Duration(milliseconds: 500));
                     backwardVideoAnimationController.reverse();
                   } else {
                     debugPrint("Right Side");
-                    videoPlayerController!.seekTo(Duration(seconds: videoPlayerController!.value.position.inSeconds + 10));
+                    videoPlayerController!.seekTo(Duration(
+                        seconds:
+                            videoPlayerController!.value.position.inSeconds +
+                                10));
                     await forwardVideoAnimationController.forward();
                     await Future.delayed(Duration(milliseconds: 500));
                     forwardVideoAnimationController.reverse();
@@ -293,7 +325,10 @@ class _VideoScreenState extends State<VideoScreen> with TickerProviderStateMixin
         ),
         Align(
           alignment: Alignment.center,
-          child: videoPlayerController!.value.isInitialized ? VideoBufferingContainer(videoPlayerController: videoPlayerController!) : Container(),
+          child: videoPlayerController!.value.isInitialized
+              ? VideoBufferingContainer(
+                  videoPlayerController: videoPlayerController!)
+              : Container(),
         ),
         _buildBackwardVideoDurationContainer(videoSize),
         _buildForwardVideoDurationContainer(videoSize),
@@ -303,7 +338,8 @@ class _VideoScreenState extends State<VideoScreen> with TickerProviderStateMixin
         Align(
           alignment: Alignment.bottomLeft,
           child: SlideTransition(
-            position: menuAnimation.drive<Offset>(Tween(begin: const Offset(0.0, 1.0), end: Offset.zero)),
+            position: menuAnimation.drive<Offset>(
+                Tween(begin: const Offset(0.0, 1.0), end: Offset.zero)),
             child: Padding(
               padding: const EdgeInsets.only(bottom: 7.5),
               child: videoPlayerController!.value.isInitialized
@@ -318,7 +354,8 @@ class _VideoScreenState extends State<VideoScreen> with TickerProviderStateMixin
         Align(
           alignment: Alignment.bottomLeft,
           child: SlideTransition(
-            position: menuAnimation.drive<Offset>(Tween(begin: const Offset(0.0, 1.0), end: Offset.zero)),
+            position: menuAnimation.drive<Offset>(
+                Tween(begin: const Offset(0.0, 1.0), end: Offset.zero)),
             child: Padding(
               padding: const EdgeInsets.only(bottom: 7.5),
               child: videoPlayerController!.value.isInitialized
@@ -346,7 +383,12 @@ class _VideoScreenState extends State<VideoScreen> with TickerProviderStateMixin
           return Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              SizedBox(width: MediaQuery.of(context).size.width, height: MediaQuery.of(context).size.height * (0.4), child: _buildVideoContainer(Size(MediaQuery.of(context).size.width, MediaQuery.of(context).size.height * (0.4)))),
+              SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height * (0.4),
+                  child: _buildVideoContainer(Size(
+                      MediaQuery.of(context).size.width,
+                      MediaQuery.of(context).size.height * (0.4)))),
             ],
           );
         },
@@ -357,10 +399,12 @@ class _VideoScreenState extends State<VideoScreen> with TickerProviderStateMixin
 
 class VideoBufferingContainer extends StatefulWidget {
   final VideoPlayerController videoPlayerController;
-  const VideoBufferingContainer({Key? key, required this.videoPlayerController}) : super(key: key);
+  const VideoBufferingContainer({Key? key, required this.videoPlayerController})
+      : super(key: key);
 
   @override
-  _VideoBufferingContainerState createState() => _VideoBufferingContainerState();
+  _VideoBufferingContainerState createState() =>
+      _VideoBufferingContainerState();
 }
 
 class _VideoBufferingContainerState extends State<VideoBufferingContainer> {
@@ -380,8 +424,10 @@ class _VideoBufferingContainerState extends State<VideoBufferingContainer> {
 
   void videoBufferDurationListener() {
     if (widget.videoPlayerController.value.buffered.isNotEmpty) {
-      if (widget.videoPlayerController.value.buffered.last.end.inSeconds == widget.videoPlayerController.value.position.inSeconds) {
-        if (widget.videoPlayerController.value.position.inSeconds != widget.videoPlayerController.value.duration.inSeconds) {
+      if (widget.videoPlayerController.value.buffered.last.end.inSeconds ==
+          widget.videoPlayerController.value.position.inSeconds) {
+        if (widget.videoPlayerController.value.position.inSeconds !=
+            widget.videoPlayerController.value.duration.inSeconds) {
           setState(() {
             isVideoBuffering = true;
           });
@@ -413,13 +459,17 @@ class _VideoBufferingContainerState extends State<VideoBufferingContainer> {
 class VideoBufferDurationContainer extends StatefulWidget {
   final VideoPlayerController videoPlayerController;
   final Size videoSize;
-  const VideoBufferDurationContainer({Key? key, required this.videoPlayerController, required this.videoSize}) : super(key: key);
+  const VideoBufferDurationContainer(
+      {Key? key, required this.videoPlayerController, required this.videoSize})
+      : super(key: key);
 
   @override
-  _VideoBufferDurationContainerState createState() => _VideoBufferDurationContainerState();
+  _VideoBufferDurationContainerState createState() =>
+      _VideoBufferDurationContainerState();
 }
 
-class _VideoBufferDurationContainerState extends State<VideoBufferDurationContainer> {
+class _VideoBufferDurationContainerState
+    extends State<VideoBufferDurationContainer> {
   double bufferDurationWidthPercentage = 0.0;
 
   @override
@@ -436,7 +486,9 @@ class _VideoBufferDurationContainerState extends State<VideoBufferDurationContai
 
   void videoBufferDurationListener() {
     if (widget.videoPlayerController.value.buffered.isNotEmpty) {
-      bufferDurationWidthPercentage = widget.videoPlayerController.value.buffered.last.end.inSeconds / widget.videoPlayerController.value.duration.inSeconds;
+      bufferDurationWidthPercentage =
+          widget.videoPlayerController.value.buffered.last.end.inSeconds /
+              widget.videoPlayerController.value.duration.inSeconds;
     } else {
       bufferDurationWidthPercentage = 0.0;
     }
@@ -457,7 +509,12 @@ class VideoDurationContainer extends StatefulWidget {
   final VideoPlayerController videoPlayerController;
   final Size videoSize;
   final AnimationController menuAnimationController;
-  const VideoDurationContainer({Key? key, required this.videoPlayerController, required this.menuAnimationController, required this.videoSize}) : super(key: key);
+  const VideoDurationContainer(
+      {Key? key,
+      required this.videoPlayerController,
+      required this.menuAnimationController,
+      required this.videoSize})
+      : super(key: key);
   @override
   _VideoDurationContainerState createState() => _VideoDurationContainerState();
 }
@@ -465,7 +522,9 @@ class VideoDurationContainer extends StatefulWidget {
 class _VideoDurationContainerState extends State<VideoDurationContainer> {
   double currentValue = 0.0;
   double thumbRadius = 0.0;
-  late Animation<double> thumbRadiusAnimation = Tween<double>(begin: 0.0, end: 6.0).animate(widget.menuAnimationController);
+  late Animation<double> thumbRadiusAnimation =
+      Tween<double>(begin: 0.0, end: 6.0)
+          .animate(widget.menuAnimationController);
 
   @override
   void initState() {
@@ -480,7 +539,8 @@ class _VideoDurationContainerState extends State<VideoDurationContainer> {
   }
 
   void videoDurationListener() {
-    currentValue = widget.videoPlayerController.value.position.inSeconds.toDouble();
+    currentValue =
+        widget.videoPlayerController.value.position.inSeconds.toDouble();
     setState(() {});
   }
 
@@ -504,7 +564,8 @@ class _VideoDurationContainerState extends State<VideoDurationContainer> {
         height: videoDurationContainerHeight,
         width: MediaQuery.of(context).size.width,
         child: Slider(
-            max: widget.videoPlayerController.value.duration.inSeconds.toDouble(),
+            max: widget.videoPlayerController.value.duration.inSeconds
+                .toDouble(),
             min: 0.0,
             activeColor: Colors.white,
             inactiveColor: Colors.white38,
@@ -522,10 +583,12 @@ class _VideoDurationContainerState extends State<VideoDurationContainer> {
 
 class VideoBottomMenuContainer extends StatefulWidget {
   final VideoPlayerController videoPlayerController;
-  VideoBottomMenuContainer({Key? key, required this.videoPlayerController}) : super(key: key);
+  VideoBottomMenuContainer({Key? key, required this.videoPlayerController})
+      : super(key: key);
 
   @override
-  _VideoBottomMenuContainerState createState() => _VideoBottomMenuContainerState();
+  _VideoBottomMenuContainerState createState() =>
+      _VideoBottomMenuContainerState();
 }
 
 class _VideoBottomMenuContainerState extends State<VideoBottomMenuContainer> {
@@ -562,6 +625,7 @@ class CustomTrackShape extends RectangularSliderTrackShape {
     bool isEnabled = false,
     bool isDiscrete = false,
   }) {
-    return Offset(offset.dx, offset.dy) & Size(parentBox.size.width, sliderTheme.trackHeight!);
+    return Offset(offset.dx, offset.dy) &
+        Size(parentBox.size.width, sliderTheme.trackHeight!);
   }
 }

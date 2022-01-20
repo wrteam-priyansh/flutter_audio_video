@@ -1,4 +1,3 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:audio_video/feature/audioPlayerHandler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
@@ -34,7 +33,7 @@ class MusicPlayerCubit extends Cubit<MusicPlayerState> {
       await _audioHandler.setAudio(url);
 
       emit(MusicPlayerSuccess(
-        audioDuration: _audioHandler.currentAudioDuration,
+        audioDuration: Duration.zero,
         audioPlayer: _audioHandler.audioPlayer,
       ));
     } catch (e) {
@@ -47,7 +46,7 @@ class MusicPlayerCubit extends Cubit<MusicPlayerState> {
 
   @override
   Future<void> close() async {
-    _audioHandler.disposeAudioPlayer();
+    //_audioHandler.disposeAudioPlayer();
     super.close();
   }
 }

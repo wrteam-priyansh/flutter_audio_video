@@ -3,7 +3,6 @@ import 'package:just_audio/just_audio.dart';
 
 class AudioPlayerHandler extends BaseAudioHandler {
   late AudioPlayer _audioPlayer;
-  Duration currentAudioDuration = Duration.zero;
 
   AudioPlayerHandler() {
     _audioPlayer = AudioPlayer();
@@ -12,16 +11,16 @@ class AudioPlayerHandler extends BaseAudioHandler {
 
   AudioPlayer get audioPlayer => _audioPlayer;
 
-  void disposeAudioPlayer() {
-    _audioPlayer.dispose();
+  @override
+  Future<void> stop() async {
+    await _audioPlayer.dispose();
+    print("Stop audio player");
+    return super.stop();
   }
 
   Future<void> setAudio(String url) async {
-    _audioPlayer.dispose();
-    _audioPlayer = AudioPlayer();
     try {
-      var result = await audioPlayer.setUrl(url);
-      currentAudioDuration = result ?? Duration.zero;
+      await audioPlayer.setUrl(url);
       mediaItem.add(MediaItem(id: url, title: "My audio title"));
     } catch (e) {
       throw Exception(e.toString());
@@ -47,15 +46,10 @@ class AudioPlayerHandler extends BaseAudioHandler {
     _audioPlayer.playbackEventStream.listen((PlaybackEvent event) {
       playbackState.add(playbackState.value.copyWith(
         controls: [
-          MediaControl.skipToPrevious,
           if (_audioPlayer.playing) MediaControl.pause else MediaControl.play,
           MediaControl.stop,
-          MediaControl.skipToNext,
         ],
-        systemActions: const {
-          MediaAction.seek,
-        },
-        androidCompactActionIndices: const [0, 1, 3],
+        //androidCompactActionIndices: const [1],
         processingState: const {
           ProcessingState.idle: AudioProcessingState.idle,
           ProcessingState.loading: AudioProcessingState.loading,
@@ -63,20 +57,20 @@ class AudioPlayerHandler extends BaseAudioHandler {
           ProcessingState.ready: AudioProcessingState.ready,
           ProcessingState.completed: AudioProcessingState.completed,
         }[_audioPlayer.processingState]!,
-        repeatMode: const {
-          LoopMode.off: AudioServiceRepeatMode.none,
-          LoopMode.one: AudioServiceRepeatMode.one,
-          LoopMode.all: AudioServiceRepeatMode.all,
-        }[_audioPlayer.loopMode]!,
-        shuffleMode: (_audioPlayer.shuffleModeEnabled) ? AudioServiceShuffleMode.all : AudioServiceShuffleMode.none,
         playing: _audioPlayer.playing,
         updatePosition: _audioPlayer.position,
         bufferedPosition: _audioPlayer.bufferedPosition,
         speed: _audioPlayer.speed,
         queueIndex: event.currentIndex,
       ));
-      print("Processing state in audio handler : ${_audioPlayer.processingState}");
-      //   PlaybackState(
+      print(
+          "Processing state in audio handler : ${_audioPlayer.processingState}");
+    });
+  }
+}
+
+
+//   PlaybackState(
       //     processingState: const {
       //       ProcessingState.idle: AudioProcessingState.idle,
       //       ProcessingState.loading: AudioProcessingState.loading,
@@ -100,6 +94,3 @@ class AudioPlayerHandler extends BaseAudioHandler {
       //     playing: _audioPlayer.playing,
       //     speed: _audioPlayer.speed,
       //   );
-    });
-  }
-}

@@ -2,7 +2,7 @@
 import 'package:audio_video/screens/audio/audioMenuScreen.dart';
 import 'package:audio_video/screens/video/videoMenuScreen.dart';
 import 'package:audio_video/screens/video/videoScreen.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -19,7 +19,8 @@ class HomeScreen extends StatelessWidget {
           children: [
             ListTile(
               onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (context) => const VideoMenuScreen()));
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const VideoMenuScreen()));
               },
               title: const Text("Video"),
             ),
@@ -28,7 +29,8 @@ class HomeScreen extends StatelessWidget {
             ),
             ListTile(
               onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AudioMenuScreen()));
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const AudioMenuScreen()));
               },
               title: const Text("Audio"),
             ),

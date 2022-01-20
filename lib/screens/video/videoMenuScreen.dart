@@ -1,10 +1,11 @@
 // ignore_for_file: file_names
 import 'package:audio_video/screens/video/videoScreen.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 
 enum VideoType { network, file, asset }
-const String url = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+const String url =
+    "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
 
 class VideoMenuScreen extends StatelessWidget {
   const VideoMenuScreen({Key? key}) : super(key: key);
